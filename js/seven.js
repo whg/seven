@@ -2,8 +2,18 @@ paper.install(window);
 
 // (function main() {
 
+var characterPaths = null;
+$.getJSON("fonts/Courier_Prime.json", function(data) {
+    // charData = data;
+    characterPaths = {};
+    for (var key in data) {
+        characterPaths[key] = new CompoundPath(data[key].data);
+    }
+    console.log("done");
+});
+
 var segmentColour = "#eee";
-var backgroundColour = "#111";
+var backgroundColour = "#1a1a1a";
 
 var canvas = document.getElementById("myCanvas");
 
@@ -24,7 +34,8 @@ digit.children["segments"].children.forEach(function(segment) {
     segment.reverse();
 });
 
-
+var dpoint = digit.position.clone();
+digit.position = new Point(0, 0);
 digit.strokeColor = null;
 digit.children["segments"].fillColor = segmentColour;
 digit.children["box"].fillColor = backgroundColour;
@@ -32,15 +43,18 @@ digit.children["box"].strokeColor = backgroundColour;
 
 var tbt = new Group();
 var dbounds = digit.getBounds();
-var n = 5;
+var trans = new Point();
+var n = 7;
 for (var i = 0; i < n; i++) {
     for (var j = 0; j < n; j++) {
         var d = digit.clone();
 
-        d.children["box"].translate(dbounds.width * i, dbounds.height * j);
+        trans.x = dbounds.width * j + dpoint.x;
+        trans.y = dbounds.height * i + dpoint.y;
+        d.children["box"].translate(trans);
 
         d.children["segments"].children.forEach(function(segment) {
-            segment.translate(dbounds.width * i, dbounds.height * j);
+            segment.translate(trans);
         });
 
         tbt.addChild(d);
@@ -54,9 +68,9 @@ digit.visible = false;
 // var letters = project.importSVG(document.getElementById("letter"), {
     // expandShapes: true
 // });
-var letter = new CompoundPath($("#letters [unicode=s]").attr("d"));
+var letter = null; //new CompoundPath(charData["S"].data);
 
-function fitLetter(letter) {
+function fitLetter(letter, toGroup) {
     
     var letterPoints = [].concat.apply([], letter.children.map(function(path) {
         return path.segments.map(function(segment) {
@@ -79,14 +93,14 @@ function fitLetter(letter) {
         y: getBounds(letterPoints.map(function(point) { return point.y; })),
     };
 
+    console.log(JSON.stringify(bounds));
     // bounds = {"x":{"min":80,"max":904,"range":824},"y":{"min":-25,"max":1490,"range":1515}};
 
 
     var aspectRatio = bounds.x.range / bounds.y.range;
 
-
+    var wantedSize = new Size(toGroup.bounds.size);
     var shift = new Point(bounds.x.min, bounds.y.min);
-    var wantedSize = new Size(tbt.bounds.size);
     var scale = new Point(wantedSize.width/bounds.x.range, wantedSize.height/bounds.y.range);
 
     var wantedAspectRatio = wantedSize.width / wantedSize.height;
@@ -113,8 +127,8 @@ function fitLetter(letter) {
         });
     }
 
-    letter.position = tbt.position;
-    letter.fillColor = null; new Color(1, 1, 0, 0.25);
+    letter.position = toGroup.position;
+    letter.fillColor = null; //new Color(1, 1, 0, 0.25);
 
     return letter;
 }
@@ -141,12 +155,22 @@ function lightDigits(digitGroup, character) {
     });
 }
 
-lightDigits(tbt, letter);
+// lightDigits(tbt, letter);
 console.log("took:" + (performance.now() - start));
 
 
 project.activeLayer.scale(1.5, new Point(0,0))
 view.draw();
+
+var gr = new Group();
+for (var i = 3; i < 6; i++) {
+    for (var j = 1; j < 4; j++) {
+        var k = j * n + i;
+        gr.children.push(tbt.children[k]);
+    }
+}
+
+// gr.fillColor = "red";
 
 // var tool = new Tool();
 function Action() {
@@ -155,12 +179,19 @@ function Action() {
     tool.onKeyDown = function(event) {
 
         try {
-            var glyph = $("#letters [unicode="+event.character+"]");
-            var letter = new CompoundPath(glyph.attr("d"));
-            lightDigits(tbt, fitLetter(letter));   
+            // var glyph = $("#letters [unicode="+event.character+"]");
+            // if (letter) {
+                // letter.remove();
+            // }
+            // letter = new CompoundPath(charData[event.character].data);
+            // letter.visible = false;
+            // console.log(charData[event.character].data);
+            lightDigits(tbt, fitLetter(characterPaths[event.character], tbt));   
         }
-        catch(err) {}
-        console.log(event);
+        catch(err) {
+            console.log(err);
+        }
+        // console.log(event);
     }
     
 }
