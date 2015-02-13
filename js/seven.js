@@ -7,7 +7,7 @@ var backgroundColour = "#111";
 
 var canvas = document.getElementById("myCanvas");
 
-paper.setup('myCanvas');
+paper.setup(canvas);
 
 project.activeLayer.transformContent = true;
 
