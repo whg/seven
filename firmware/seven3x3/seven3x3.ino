@@ -3,7 +3,8 @@ int counter = 0, c2 = 0;
 
 byte numbers[] = { 63, 6, 91, 79, 102, 109, 125, 7, 127, 111, 63 }; //252, 96, 218, 242, 102, 182, 190, 224, 254, 246 };
 
-int clocks[] = { A4, A3, A5 };
+int clocks[] = { A5, A4, A3 };
+int clearPin = 12;
 
 void setup() {
 //  pinMode(8, OUTPUT);
@@ -11,7 +12,7 @@ void setup() {
   
   digitalWrite(9, LOW);
   
-  for(int i = 2; i < 10; i++) {
+  for(int i = 2; i < 13; i++) {
     pinMode(i, OUTPUT);
     digitalWrite(i, LOW);
   }
@@ -28,7 +29,7 @@ void setup() {
   pinMode(A1, OUTPUT);
 //  pinMode(A2, OUTPUT);
   
-  Timer1.initialize(2000);
+  Timer1.initialize(1000);
   Timer1.attachInterrupt( timerIsr );
 }
 
@@ -59,14 +60,16 @@ void timerIsr()
 //    PORTD = digits[v%10];
 //    digitalWrite(10 + counter, LOW);
 
-  int col = (counter++ % 4);
 
+
+  int col = (counter++ % 12);
+  PORTB = 15 & col;
 
   for (int row = 0; row < 3; row++) {
     digitalWrite(clocks[row], LOW);
 //    int val = 2;
     
-    int val = numbers[(row * 4 + c2) % 10]; ////(c2 + row * 4)  % 10];//abs(c2 - col - row*2) % 10];
+    int val = numbers[(row * 12 + col) % 10]; ////(c2 + row * 4)  % 10];//abs(c2 - col - row*2) % 10];
     PORTD = (PORTD & 3) | (252 & val);
     PORTC = (PORTC & 252) | (3  & val);
     
@@ -76,10 +79,14 @@ void timerIsr()
 //  digitalWrite(A4, LOW); 
 //
 //  digitalWrite(A4, HIGH);
-  
-    PORTB = 3 & col;
 
-  if (counter % 400 == 0) {
+
+  // send all outputs low
+  digitalWrite(clearPin, HIGH);
+
+
+  if (counter % 12*20 == 0) {
     c2++;
+    counter = 0;
   }
 }
