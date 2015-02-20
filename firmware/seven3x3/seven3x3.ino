@@ -14,6 +14,7 @@ byte tbtNumbers[][9] = {
   { 78, 35, 108, 15, 98, 56, 229, 156, 115 },
   { 90, 35, 108, 103, 84, 111, 140, 92, 32 },
 };
+byte segs[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
 byte six[] = { 132, 99, 33, 125, 98, 252, 229, 156, 83 };
 int clocks[] = { A5, A4, A3 };
@@ -44,7 +45,11 @@ void setup() {
   
   Timer1.initialize(1000);
   Timer1.attachInterrupt( timerIsr );
+  
+ digitalWrite(clearPin, LOW);
+
 }
+int q = 0;
 
 void loop() {
   
@@ -58,7 +63,7 @@ void loop() {
 
 //void writeByte(byte b) {
 //  digitalWrite(
-
+int c3 = 1;
 void timerIsr()
 {
 //    digitalWrite(10 + counter, HIGH);
@@ -73,20 +78,31 @@ void timerIsr()
 //    PORTD = digits[v%10];
 //    digitalWrite(10 + counter, LOW);
 
+//    digitalWrite(clearPin, LOW);
 
 
-  int col = (counter++ % 12);
-  PORTB = 15 & col;
+  int col = (counter++) % 12;
+//  counter++;
+//      digitalWrite(clearPin, HIGH);
+ digitalWrite(clearPin, HIGH);
 
+
+//      digitalWrite(clearPin, LOW);
   for (int row = 0; row < 3; row++) {
     digitalWrite(clocks[row], LOW);
 //    int val = 2;
-    
+      int k = ((row) * 12 + col);
 //    int val = numbers[(row * 12 + col) % 10]; ////(c2 + row * 4)  % 10];//abs(c2 - col - row*2) % 10];
     int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; //numbers[(row * 3 + col) % 10];
-    int val = tbtNumbers[c2%10][numberIndex]; //six[numberIndex];
-//    val = numbers[numberIndex];
+//    int val = tbtNumbers[(c2 + col / 3) %10][numberIndex]; //six[numberIndex];
+    int val = tbtNumbers[(c2+ col  / 3) %10][numberIndex]; //six[numberIndex];
+//    val = numbers[k%10]; //(numberIndex + c2 ) % 10];
 //    val = six[numberIndex];
+//val = segs[(k*3 + c2*c3) % 8];
+val = numbers[col % 10];
+//val = numbers[(k*3 + c2*c3) % 10];
+//val = numbers[numberIndex % 10];
+//val = (int) pow(2, 7);
     PORTD = (PORTD & 3) | (252 & val);
     PORTC = (PORTC & 252) | (3  & val);
     
@@ -98,12 +114,20 @@ void timerIsr()
 //  digitalWrite(A4, HIGH);
 
 
+//
   // send all outputs low
-  digitalWrite(clearPin, HIGH);
-
-
-  if (counter % (12*20) == 0) {
+ 
+   digitalWrite(clearPin, LOW);
+  PORTB = 15 & col;
+//  digitalWrite(clearPin, HIGH);
+  
+  if (counter % (12*100) == 0) {
     c2++;
+    if (c2 > 50) {
+      c3++;
+      c2 = 0;
+    }
+//    q = (int) ceil(pow(2.0, (c2 % 10)));
     counter = 0;
   }
 }
