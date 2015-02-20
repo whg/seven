@@ -21,6 +21,7 @@ byte six[] = { 132, 99, 33, 125, 98, 252, 229, 156, 83 };
 int clocks[] = { A5, A4, A3 };
 int clearPin = 13;
 int shift = 0;
+char *message = "HELO";
 
 void setup() {
 //  pinMode(8, OUTPUT);
@@ -94,17 +95,8 @@ void timerIsr()
 //  counter++;
 //      digitalWrite(clearPin, HIGH);
  digitalWrite(clearPin, HIGH);
-//  if (col < 11)  {
-//   for (int row = 0; row < 3; row++) {
-//    digitalWrite(clocks[row], LOW);
-//    int val = 0;
-//    PORTD = (PORTD & 3) | (252 & val);
-//    PORTC = (PORTC & 252) | (3  & val);
-//    digitalWrite(clocks[row], HIGH);
-//  } 
-//    return;
-//  }
 
+    int characterCol = col / 3;
 //      digitalWrite(clearPin, LOW);
 int val = 0;
   for (int row = 0; row < 3; row++) {
@@ -138,9 +130,22 @@ int val = 0;
 //    val = ((k + c2 - row) % 3) != 0 ? q : 0;
 
 
-    val = tbtNumbers[( c3 + col  / 3 + 1) %10][numberIndex]; //six[numberIndex];
+//    val = tbtNumbers[( c3 + col  / 3 + 1) %10][numberIndex]; //six[numberIndex];
 //    val = 255;
-    val&= ((1 << (c2%9)) - 1);// | (q << (qq%8));
+//    val&= ((1 << (c2%9)) - 1);// | (q << (qq%8));
+    
+    //// horizontal - vertical
+//    val &= (c3 % 2 == 0) ? 73 : 54;
+    
+//  val&= 127; //get rid of dot
+
+    
+  //// going through characters
+//    val = characters[( c2 + col  / 3 + 1) %43][numberIndex]; //six[numberIndex];
+
+
+    char c = message[characterCol];
+    val = characters[c - '0'][numberIndex];
 
     PORTD = (PORTD & 3) | (252 & val);
     PORTC = (PORTC & 252) | (3  & val);
@@ -164,10 +169,10 @@ int val = 0;
   }
 //  digitalWrite(clearPin, HIGH);
   
-  if (counter % (numCols*10) == 0) {
+  if (counter % (numCols*20) == 0) {
     c2++;
     
-    if (c2 > 8) {
+    if (c2 > 43) {
       q = q << 1;
       if(q > 255) {
         qq++;
