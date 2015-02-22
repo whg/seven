@@ -46,7 +46,7 @@ void setup() {
   pinMode(A1, OUTPUT);
 //  pinMode(A2, OUTPUT);
   
-  Timer1.initialize(900);
+  Timer1.initialize(600);
   Timer1.attachInterrupt( timerIsr );
   
  digitalWrite(clearPin, LOW);
@@ -83,7 +83,7 @@ void timerIsr()
 //    digitalWrite(10 + counter, LOW);
 
 //    digitalWrite(clearPin, LOW);
-  int numCols = 12;
+  int numCols = 20;
 
   int col = (counter++) % numCols;
   
@@ -95,6 +95,8 @@ void timerIsr()
 //  counter++;
 //      digitalWrite(clearPin, HIGH);
  digitalWrite(clearPin, HIGH);
+
+  if (col >= 12) return;
 
     int characterCol = col / 3;
 //      digitalWrite(clearPin, LOW);
@@ -113,11 +115,11 @@ int val = 0;
 //    val = six[numberIndex];
 //val = segs[(k*3 + c2*c3) % 8];
 
-//val = numbers[col % 10];
+//val = numbers[9];//col % 10];
 //val = numbers[(col % 2) * 7 + 1];
 
  //// eights and tops
-//val = ((col) % 2) * 254 + 1;
+val = ((col) % 2) * 254 + 1;
 //val = ((col + c2 % 2) % 2) * 254 + 1;
 
 
@@ -144,8 +146,8 @@ int val = 0;
 //    val = characters[( c2 + col  / 3 + 1) %43][numberIndex]; //six[numberIndex];
 
 
-    char c = message[characterCol];
-    val = characters[c - '0'][numberIndex];
+//    char c = message[characterCol];
+//    val = characters[c - '0'][numberIndex];
 
     PORTD = (PORTD & 3) | (252 & val);
     PORTC = (PORTC & 252) | (3  & val);
