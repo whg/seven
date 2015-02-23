@@ -2,6 +2,8 @@ int counter = 0, c2 = 0;
 #include <TimerOne.h>
 #include "data.h"
 
+const unsigned int NUM_COLS = 12;
+
 byte numbers[] = { 63, 6, 91, 79, 102, 109, 125, 7, 127, 111, 63 }; //252, 96, 218, 242, 102, 182, 190, 224, 254, 246 };
 byte tbtNumbers[][9] = {
   { 78, 35, 124, 120, 0, 199, 231, 156, 113 },
@@ -23,7 +25,7 @@ int clearPin = A4;
 int shift = 0;
 char *message = "HELO";
 
-void timerIsr();
+void columnTimer();
 
 void setup() {
 //  pinMode(8, OUTPUT);
@@ -50,68 +52,33 @@ void setup() {
   pinMode(A3, OUTPUT);
   
   
-  Timer1.initialize(600);
-  Timer1.attachInterrupt( timerIsr );
+  Timer1.initialize(1000);
+  Timer1.attachInterrupt(columnTimer);
   
   pinMode(clearPin, OUTPUT);
  digitalWrite(clearPin, LOW);
 
 }
-int q = 1;
-int qq = 1;
 
 void loop() {
-  
-//  digitalWrite(8, (counter++ % 2) ? HIGH : LOW);
-  
-//  PORTB = 2; //3 & (counter++ % 4);
-  
-//  delay(1);
-  
+
 }
 
-//void writeByte(byte b) {
-//  digitalWrite(
-int c3 = 1;
-void timerIsr() {
-//    digitalWrite(10 + counter, HIGH);
-//    counter++;
-//    counter %= 4;
-//    int n = 1;
-//    for(int i = 0; i < (3-(counter)); i++) {
-//      n*= 10;
-//    }
-//    int v = c2 / n;
-//
-//    PORTD = digits[v%10];
-//    digitalWrite(10 + counter, LOW);
+void columnTimer() {
 
-//    digitalWrite(clearPin, LOW);
-  int numCols = 12;
+  int col = (counter++) % NUM_COLS;
 
-  int col = (counter++) % numCols;
-  
-//  if (counter % 12 == 0) {
-//    counter = 0;
-//  }
+  digitalWrite(clearPin, HIGH);
 
+  int characterCol = col / 3;
 
-//  counter++;
-//      digitalWrite(clearPin, HIGH);
- digitalWrite(clearPin, HIGH);
-
-//  if (col >= 12) return;
-
-    int characterCol = col / 3;
-//      digitalWrite(clearPin, LOW);
-int val = 0;
+  int val = 0;
   for (int row = 0; row < 3; row++) {
 
-    digitalWrite(clocks[row], LOW);
-//    int val = 2;
+      digitalWrite(clocks[row], LOW);
       int k = ((row) * 12 + col);
-//    int val = numbers[(row * 12 + col) % 10]; ////(c2 + row * 4)  % 10];//abs(c2 - col - row*2) % 10];
-    int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; //numbers[(row * 3 + col) % 10];
+
+      int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; //numbers[(row * 3 + col) % 10];
 //     val = tbtNumbers[(c2 + col / 3) %10][numberIndex]; //six[numberIndex];
 //     val = tbtNumbers[(c2+ col  / 3) %10][numberIndex]; //six[numberIndex];
 // val = stuff[0][c2 % 90][numberIndex];
@@ -122,7 +89,7 @@ int val = 0;
 //val = numbers[col%10];//col % 10];
 //val = numbers[k%10];// (k+c2/10) % 10];
 //val = numbers[(col % 2) * 7 + 1];
-val  = 255;
+    val  = 255;
 
  //// eights and tops
 /* val = ((col) % 2) * 254 + 1; */
@@ -166,23 +133,14 @@ val = ((col + c2 % 2) % 2) * 254 + 1;
     digitalWrite(clocks[row], HIGH);
   }
 
-//  digitalWrite(A4, LOW);
-//
-//  digitalWrite(A4, HIGH);
-
-
-
-//
   // send all outputs low
- 
-   digitalWrite(clearPin, LOW);
+  digitalWrite(clearPin, LOW);
   PORTC = 15 & col;
   if (col >= 12) {
-    digitalWrite(clearPin, HIGH);
+      digitalWrite(clearPin, HIGH);
   }
-//  digitalWrite(clearPin, HIGH);
   
-  if (counter % (numCols*20) == 0) {
+  if (counter % (NUM_COLS*20) == 0) {
     c2++;
     
     if (c2 > 43) {
