@@ -23,6 +23,8 @@ int clearPin = A4;
 int shift = 0;
 char *message = "HELO";
 
+void timerIsr();
+
 void setup() {
 //  pinMode(8, OUTPUT);
 //  pinMode(9, OUTPUT);
@@ -48,10 +50,10 @@ void setup() {
   pinMode(A3, OUTPUT);
   
   
-  Timer1.initialize(600000);
+  Timer1.initialize(600);
   Timer1.attachInterrupt( timerIsr );
   
-  digitalWrite(clearPin, OUTPUT);
+  pinMode(clearPin, OUTPUT);
  digitalWrite(clearPin, LOW);
 
 }
@@ -71,8 +73,7 @@ void loop() {
 //void writeByte(byte b) {
 //  digitalWrite(
 int c3 = 1;
-void timerIsr()
-{
+void timerIsr() {
 //    digitalWrite(10 + counter, HIGH);
 //    counter++;
 //    counter %= 4;
@@ -81,7 +82,7 @@ void timerIsr()
 //      n*= 10;
 //    }
 //    int v = c2 / n;
-//    
+//
 //    PORTD = digits[v%10];
 //    digitalWrite(10 + counter, LOW);
 
@@ -124,8 +125,8 @@ int val = 0;
 val  = 255;
 
  //// eights and tops
-//val = ((col) % 2) * 254 + 1;
-//val = ((col + c2 % 2) % 2) * 254 + 1;
+/* val = ((col) % 2) * 254 + 1; */
+val = ((col + c2 % 2) % 2) * 254 + 1;
 
 
 //val = numbers[(k*3 + c2*c3) % 10];
@@ -133,8 +134,8 @@ val  = 255;
 //val = (int) pow(2, 7);
 
   //// parts of digit showing
-//    val = (k + c2 - row) % 3 == 0 ? 2 : 0;
-//    val = ((k + c2 - row) % 3) != 0 ? q : 0;
+   /* val = (k + c2 - row) % 3 == 0 ? 2 : 0; */
+   /* val = ((k + c2 - row) % 3) != 0 ? q : 0; */
 
 
 //    val = tbtNumbers[( c3 + col  / 3 + 1) %10][numberIndex]; //six[numberIndex];
@@ -161,11 +162,11 @@ val  = 255;
 //    PORTD = (PORTD & 3) | (252 & val);
 //    PORTC = (PORTC & 252) | (3  & val);
     
-    PORTD = (val & 255);    
+    PORTD = (val & 255);
     digitalWrite(clocks[row], HIGH);
   }
 
-//  digitalWrite(A4, LOW); 
+//  digitalWrite(A4, LOW);
 //
 //  digitalWrite(A4, HIGH);
 
