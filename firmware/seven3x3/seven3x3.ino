@@ -18,8 +18,8 @@ byte tbtNumbers[][9] = {
 byte segs[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
 byte six[] = { 132, 99, 33, 125, 98, 252, 229, 156, 83 };
-int clocks[] = { A5, A4, A3 };
-int clearPin = 13;
+int clocks[] = {  8, 9, 10 };
+int clearPin = A4;
 int shift = 0;
 char *message = "HELO";
 
@@ -29,7 +29,7 @@ void setup() {
   
   digitalWrite(9, LOW);
   
-  for(int i = 2; i < 14; i++) {
+  for(int i = 0; i < 14; i++) {
     pinMode(i, OUTPUT);
     digitalWrite(i, LOW);
   }
@@ -44,11 +44,14 @@ void setup() {
   PORTD = 0;
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
-//  pinMode(A2, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
   
-  Timer1.initialize(600);
+  
+  Timer1.initialize(600000);
   Timer1.attachInterrupt( timerIsr );
   
+  digitalWrite(clearPin, OUTPUT);
  digitalWrite(clearPin, LOW);
 
 }
@@ -83,7 +86,7 @@ void timerIsr()
 //    digitalWrite(10 + counter, LOW);
 
 //    digitalWrite(clearPin, LOW);
-  int numCols = 20;
+  int numCols = 12;
 
   int col = (counter++) % numCols;
   
@@ -96,7 +99,7 @@ void timerIsr()
 //      digitalWrite(clearPin, HIGH);
  digitalWrite(clearPin, HIGH);
 
-  if (col >= 12) return;
+//  if (col >= 12) return;
 
     int characterCol = col / 3;
 //      digitalWrite(clearPin, LOW);
@@ -115,11 +118,13 @@ int val = 0;
 //    val = six[numberIndex];
 //val = segs[(k*3 + c2*c3) % 8];
 
-//val = numbers[9];//col % 10];
+//val = numbers[col%10];//col % 10];
+//val = numbers[k%10];// (k+c2/10) % 10];
 //val = numbers[(col % 2) * 7 + 1];
+val  = 255;
 
  //// eights and tops
-val = ((col) % 2) * 254 + 1;
+//val = ((col) % 2) * 254 + 1;
 //val = ((col + c2 % 2) % 2) * 254 + 1;
 
 
@@ -141,6 +146,10 @@ val = ((col) % 2) * 254 + 1;
     
 //  val&= 127; //get rid of dot
 
+//    int q1 = (k+c2) % 8;
+//    int q2 = (q1+4) % 8;
+//    val = ((c2/2) % 2 == 0) ? (1<<q1) : (1<<q2);//col % 10];
+
     
   //// going through characters
 //    val = characters[( c2 + col  / 3 + 1) %43][numberIndex]; //six[numberIndex];
@@ -149,9 +158,10 @@ val = ((col) % 2) * 254 + 1;
 //    char c = message[characterCol];
 //    val = characters[c - '0'][numberIndex];
 
-    PORTD = (PORTD & 3) | (252 & val);
-    PORTC = (PORTC & 252) | (3  & val);
+//    PORTD = (PORTD & 3) | (252 & val);
+//    PORTC = (PORTC & 252) | (3  & val);
     
+    PORTD = (val & 255);    
     digitalWrite(clocks[row], HIGH);
   }
 
@@ -165,7 +175,7 @@ val = ((col) % 2) * 254 + 1;
   // send all outputs low
  
    digitalWrite(clearPin, LOW);
-  PORTB = 15 & col;
+  PORTC = 15 & col;
   if (col >= 12) {
     digitalWrite(clearPin, HIGH);
   }
