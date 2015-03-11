@@ -3,13 +3,13 @@ volatile uint16_t secondsElapsed = 0, frameCount = 0, c2 = 0;
 #include <TimerOne.h>
 #include "data.h"
 
-volatile uint16_t globalTime = 1342;
+volatile uint16_t globalTime = 900;
 
 const uint16_t NUM_COLS = 12;
 const uint16_t NUM_ROWS = 3;
 const uint16_t NUM_DIGITS = NUM_COLS * NUM_ROWS;
-const uint16_t FRAME_LENGTH = 250; //in millis
-const uint8_t  NUM_FRAMES_IN_SEC = 2000 / FRAME_LENGTH;
+const uint16_t FRAME_LENGTH = 125; //in millis
+const uint8_t  NUM_FRAMES_IN_SEC = 1000 / FRAME_LENGTH;
 const uint16_t COUNTER_REDUCTION = FRAME_LENGTH / NUM_COLS * NUM_COLS;
 #define INDEX(row, col) ((row) * NUM_COLS + (col))
 
@@ -144,21 +144,61 @@ inline void bigTime(uint16_t time) {
                 frameBuffer[k] = characters[v][r*3+c];
             }
         }
-    }
+    }    
+}
+
+inline void oldDigitsTime(uint16_t time) {
+
+
+    uint8_t *frameBuffer = nextBuffer();
     
-    
+    uint8_t k, v;
+    for (int8_t i = 3; i >= 0; i--) {
+        v = time % 10;
+        time/= 10;
+        
+        for (uint8_t r = 0; r < 3; r++) {
+            for (uint8_t c = 0; c < 3; c++) {
+                k = INDEX(r, c + i*3);
+                frameBuffer[k] = tbtNumbers[v][r*3+c];
+            }
+        }
+    }    
+}
+
+inline void allEights(uint16_t _) {
+
+    uint8_t *frameBuffer = nextBuffer();
+    for (uint8_t i = 0; i < NUM_DIGITS; frameBuffer[i] = 255, i++);
+}
+
+inline void timeUnits(uint16_t t) {
+
+    uint8_t *frameBuffer = nextBuffer();
+    uint8_t units = numbers[t % 10];
+    for (uint8_t i = 0; i < NUM_DIGITS; frameBuffer[i] = units, i++);
 }
 
 typedef void (*displayFunction)(uint16_t);
 
 
 volatile displayFunction displayFuncs[] = {
-    /* centralTime, */
-    /* allTime, */
-    /* singleDigitBigTime, */
-    bigTime
+    centralTime,
+    /* allEights, */
+    allTime,
+    singleDigitBigTime,
+    bigTime,
+    centralTime,
+    timeUnits,
+    bigTime,
+    oldDigitsTime,
+    bigTime,
+    oldDigitsTime,
+    bigTime,
+    oldDigitsTime,
+    
 };
-const uint8_t NUM_DISPLAY_FUNCS = 4;
+const uint8_t NUM_DISPLAY_FUNCS = 12;
 
 void setup() {
   
@@ -301,15 +341,6 @@ void lightDigits(uint8_t col) {
 /*   } */
 }
 
-void prepareBuffer() {
-    /* centralClock(); */
-    /* centralTime(1234); */
-    /* allTime(1234); */
-    /* bigTime(1234); */
-
-
-    
-}
 
 volatile uint8_t interpolationOrders[][8] = {
     { 2,4,1,5,6,7,3,0 },
@@ -341,11 +372,12 @@ void secondCallback() {
     interpolationCounter = 0;
     interpolationOrderCounter = ++interpolationOrderCounter % NUM_ORDERS;
     
-    /* df = displayFuncs[dfc]; */
+    df = displayFuncs[dfc];
 
 
-    /* df(globalTime); */
-    displayFuncs[dfc](globalTime++);
+    df(globalTime);
+    globalTime++;
+    /* displayFuncs[dfc](6789); */
 
     // 0123456789
     // 1234 0827 
