@@ -13,7 +13,7 @@ var charData = { "!": { "name" : "exclam" }, "\"": { "name" : "quotedbl" }, "#":
 
 var infile = process.argv[2];
 var outfile = infile.replace(".svg", ".json");
-if (process.arvg[3] !== undefined) {
+if (process.argv[3] !== undefined) {
     outfile = process.argv[3];
 }
 
