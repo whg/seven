@@ -14,7 +14,7 @@ const uint16_t COUNTER_REDUCTION = FRAME_LENGTH / NUM_COLS * NUM_COLS;
 #define INDEX(row, col) ((row) * NUM_COLS + (col))
 
 
-uint8_t numbers[] = { 63, 6, 91, 79, 102, 109, 125, 7, 127, 111, 63 }; //252, 96, 218, 242, 102, 182, 190, 224, 254, 246 };
+uint8_t numbers[] = { 63, 6, 91, 79, 102, 109, 125, 7, 127, 111, 63 };
 uint8_t tbtNumbers[][9] = {
   { 78, 35, 124, 120, 0, 199, 231, 156, 113 },
   { 66, 109, 0, 0, 109, 0, 136, 237, 136 },
@@ -46,24 +46,6 @@ inline uint8_t* nextBuffer() {
     return frameBuffers[fbc];
 }
 
-/* inline void centralClock() { */
-
-/*     /\* for (uint16_t i = 0; i < NUM_DIGITS; i++) { *\/ */
-/*     /\*     frameBuffer[i] = numbers[i%10]; *\/ */
-/*     /\* } *\/ */
-
-
-/*     for (uint8_t k = 0; k < NUM_DIGITS; k++) { */
-/*         if (k < 16 || k > 19) { */
-/*             frameBuffer[k] = 0; */
-/*         } */
-/*         else { */
-/*             frameBuffer[k]  = numbers[(k % 10)]; */
-/*         } */
-/*     } */
-    
-/* } */
-
 
 // show a 4 digit time in the central group of 4
 inline void centralTime(uint16_t time) {
@@ -92,11 +74,10 @@ inline void allTime(uint16_t time) {
         }
     }
 
-    /* if ((frameCount / 5) % 2) { */
-        for (uint8_t j = 0; j < 9; j++) {
-            frameBuffer[j*4+1] |= 128;
-        }
-    /* } */
+    for (uint8_t j = 0; j < 9; j++) {
+        frameBuffer[j*4+1] |= 128;
+    }
+
 }
 
 inline void singleDigitBigTime(uint16_t time) {
@@ -121,15 +102,6 @@ inline uint8_t numberIndex(uint8_t row, uint8_t col) {
 }
 
 inline void bigTime(uint16_t time) {
-
-    /* for (uint8_t row = 0; row < NUM_ROWS; row++) { */
-    /*     for (uint8_t col = 0; col < NUM_COLS; col++) { */
-    /*         uint8_t k = INDEX(row, col); */
-    /*         /\* int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; *\/ */
-    /*         frameBuffer[k] = characters[0][numberIndex(row, col)]; */
-    /*         /\* val = characters[( row + col  / 3 + 1) %43][numberIndex]; *\/ */
-    /*     } */
-    /* } */
 
     uint8_t *frameBuffer = nextBuffer();
     
@@ -236,143 +208,30 @@ void loop() {
 }
 
 void lightDigits(uint8_t col) {
-    
-  /* int col = (counter++) % NUM_COLS; */
 
-  digitalWrite(clearPin, HIGH);
+    // turn everything off first
+    digitalWrite(clearPin, HIGH);
 
-  /* int characterCol = col / 3; */
+    int val = 0;
+    for (int row = 0; row < NUM_ROWS; row++) {
 
-  int val = 0;
-  for (int row = 0; row < NUM_ROWS; row++) {
+        digitalWrite(clocks[row], LOW);
+        int k = INDEX(row, col);
 
-      digitalWrite(clocks[row], LOW);
-      int k = INDEX(row, col); /* ((row) * 12 + col); */
-
-      val = currentFrame[k];
+        val = currentFrame[k];
       
-      int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; //numbers[(row * 3 + col) % 10];
-//     val = tbtNumbers[(c2 + col / 3) %10][numberIndex]; //six[numberIndex];
-//     val = tbtNumbers[(c2+ col  / 3) %10][numberIndex]; //six[numberIndex];
-// val = stuff[0][c2 % 90][numberIndex];
-//    val = numbers[k%10]; //(numberIndex + c2 ) % 10];
-//    val = six[numberIndex];
-//val = segs[(k*3 + c2*c3) % 8];
-
-      /* val = numbers[(k+c2)%10];//col % 10]; */
-//val = numbers[k%10];// (k+c2/10) % 10];
-//val = numbers[(col % 2) * 7 + 1];
-    /* val  = 255; */
-
- //// eights and tops
-/* val = ((col) % 2) * 254 + 1; */
-/* val = ((col + c2 % 2) % 2) * 254 + 1; */
-
-      /* val = centralClock(row, col); */
-      /* val = numbers[INDEX(row, col) % 10]; */
       
-//val = numbers[(k*3 + c2*c3) % 10];
-//val = numbers[numberIndex % 10];
-//val = (int) pow(2, 7);
-
-  //// parts of digit showing
-   /* val = (k + c2 - row) % 3 == 0 ? 2 : 0; */
-   /* val = ((k + c2 - row) % 3) != 0 ? q : 0; */
+        PORTD = (val & 255);
+        digitalWrite(clocks[row], HIGH);
+    }
 
 
-//    val = tbtNumbers[( c3 + col  / 3 + 1) %10][numberIndex]; //six[numberIndex];
-//    val = 255;
-//    val&= ((1 << (c2%9)) - 1);// | (q << (qq%8));
-    
-    //// horizontal - vertical
-//    val &= (c3 % 2 == 0) ? 73 : 54;
+    digitalWrite(clearPin, LOW);
+    PORTC = 15 & col;
+    /* if (col >= 12) { */
+    /*     digitalWrite(clearPin, HIGH); */
+    /* } */
 
-//  val&= 127; //get rid of dot
-
-   /* int q1 = (k+c2) % 8; */
-   /* int q2 = (q1+4) % 8; */
-   /* val = ((c2/2) % 2 == 0) ? (3<<q1) : (3<<q2);//col % 10]; */
-
-    
-  //// going through characters
-   /* val = characters[( c2 + col  / 3 + 1) %43][numberIndex]; //six[numberIndex]; */
-
-      /* uint8_t upto = (c2/2) % 12; */
-
-      /* if (col < upto) { */
-      /*     val |= 0b110000; */
-      /*     if (col < upto-1 || c2 % 2) { */
-      /*         val |= 0b110; */
-      /*     } */
-      /* } */
-
-
-      // 8s going across 
-      /* uint8_t upto = (c2/3) % 12; */
-
-      /* if (col <= upto) { */
-      /*     val |= 0b110000; */
-      /*     if (col < upto-1 || c2 % 3 == 2) { */
-      /*         val = 127; */
-      /*     } */
-      /*     else if (c2 % 3 == 1) { */
-      /*         val |= 1001001; */
-      /*     } */
-      /* } */
-
-      /* int8_t upto = (c2/3) % 3; */
-      /* if (row < upto) { */
-      /*     val|= 1; */
-      /*     if (row < upto-1 || c2 % 3 == 2) { */
-      /*         val |= 0b1001001; */
-      /*     } */
-      /*     else if (c2 % 3 == 1) { */
-      /*         val |= 1000001; */
-      /*     } */
-      /* } */
-      
-
-//    char c = message[characterCol];
-//    val = characters[c - '0'][numberIndex];
-
-//    PORTD = (PORTD & 3) | (252 & val);
-//    PORTC = (PORTC & 252) | (3  & val);
-
-      
-    PORTD = (val & 255);
-    digitalWrite(clocks[row], HIGH);
-  }
-
-  // send all outputs low
-  digitalWrite(clearPin, LOW);
-  PORTC = 15 & col;
-  /* if (col >= 12) { */
-  /*     digitalWrite(clearPin, HIGH); */
-  /* } */
-
-
-  
-/*   if (counter % (NUM_COLS*20) == 0) { */
-/*     c2++; */
-    
-/*     if (c2 > 43) { */
-/*       /\* q = q << 1; *\/ */
-/*       /\* if(q > 255) { *\/ */
-/*         /\* qq++; *\/ */
-
-/* //        q = 2*qq; */
-/*         /\* q = (1 << qq) -1; *\/ */
-        
-/*         /\* if (qq > 8) qq = 0; *\/ */
-/*       /\* } *\/ */
-
-
-/*       /\* c3++; *\/ */
-/*       c2 = 0; */
-/*     } */
-/* //    q = (int) ceil(pow(2.0, (c2 % 10))); */
-/*     counter = 0; */
-/*   } */
 }
 
 
@@ -430,12 +289,8 @@ void interpolateFrames() {
 
     if (interpolationCounter < 8) {
         for (uint8_t i = 0; i < NUM_DIGITS; i++) {
-            /* currentFrame[i] = frameBuffers[nfbc][i] & (frameBuffers[fbc][i] & ((2 << c) - 1)); */
             uint8_t segon = frameBuffers[fbc][i] & (1 << c);
-            /* currentFrame[i] = frameBuffers[nfbc][i] | segon << c; */
             currentFrame[i] ^= (-segon ^ currentFrame[i]) & (1 << c);
-            /* currentFrame[i] = frameBuffers[fbc][i] & ((2 << c) - 1); */
-            /* currentFrame[i] = frameBuffers[fbc][i]; */
         }
         interpolationCounter++;
     }
@@ -444,36 +299,24 @@ void interpolateFrames() {
             currentFrame[i] = frameBuffers[fbc][i];
         }
     }
-
-    /* if (interpolationCounter < 8) */
-    /* c = ++c % 8; */
 }
 
 void mainTimer() {
-    /* static uint8_t t = 0; */
-    
-    /* if (t++ % 2) { */
-    /*     prepareBuffer(); */
-    /* } */
-    /* else { */
-        
+    if (!(counter % FRAME_LENGTH)) {
+        if (!(frameCount % NUM_FRAMES_IN_SEC)) {
 
-        if (!(counter % FRAME_LENGTH)) {
-            if (!(frameCount % NUM_FRAMES_IN_SEC)) {
-
-                if (!(secondsElapsed % 2))secondCallback();
+            if (!(secondsElapsed % 2))secondCallback();
 
 
-                secondsElapsed++;
-               c2++;         
-            }
-            interpolateFrames();
-            frameCount++;
-            counter = counter % NUM_COLS;
-
+            secondsElapsed++;
+           c2++;         
         }
+        interpolateFrames();
+        frameCount++;
+        counter = counter % NUM_COLS;
 
-        lightDigits((counter++) % NUM_COLS);
-    /* } */
+    }
+
+    lightDigits((counter++) % NUM_COLS);
 }
 
