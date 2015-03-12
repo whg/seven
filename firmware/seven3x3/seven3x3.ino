@@ -3,12 +3,12 @@ volatile uint16_t secondsElapsed = 0, frameCount = 0, c2 = 0;
 #include <TimerOne.h>
 #include "data.h"
 
-volatile uint16_t globalTime = 900;
+volatile uint16_t globalTime = 700;
 
 const uint16_t NUM_COLS = 12;
 const uint16_t NUM_ROWS = 3;
 const uint16_t NUM_DIGITS = NUM_COLS * NUM_ROWS;
-const uint16_t FRAME_LENGTH = 125; //in millis
+const uint16_t FRAME_LENGTH = 50; //in millis
 const uint8_t  NUM_FRAMES_IN_SEC = 1000 / FRAME_LENGTH;
 const uint16_t COUNTER_REDUCTION = FRAME_LENGTH / NUM_COLS * NUM_COLS;
 #define INDEX(row, col) ((row) * NUM_COLS + (col))
@@ -251,7 +251,7 @@ void lightDigits(uint8_t col) {
 
       val = currentFrame[k];
       
-      /* int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; //numbers[(row * 3 + col) % 10]; */
+      int numberIndex = ((row) * 3 + col) % 3 + row * 3 ; //numbers[(row * 3 + col) % 10];
 //     val = tbtNumbers[(c2 + col / 3) %10][numberIndex]; //six[numberIndex];
 //     val = tbtNumbers[(c2+ col  / 3) %10][numberIndex]; //six[numberIndex];
 // val = stuff[0][c2 % 90][numberIndex];
@@ -286,17 +286,51 @@ void lightDigits(uint8_t col) {
     
     //// horizontal - vertical
 //    val &= (c3 % 2 == 0) ? 73 : 54;
-    
+
 //  val&= 127; //get rid of dot
 
-//    int q1 = (k+c2) % 8;
-//    int q2 = (q1+4) % 8;
-//    val = ((c2/2) % 2 == 0) ? (1<<q1) : (1<<q2);//col % 10];
+   /* int q1 = (k+c2) % 8; */
+   /* int q2 = (q1+4) % 8; */
+   /* val = ((c2/2) % 2 == 0) ? (3<<q1) : (3<<q2);//col % 10]; */
 
     
   //// going through characters
    /* val = characters[( c2 + col  / 3 + 1) %43][numberIndex]; //six[numberIndex]; */
 
+      /* uint8_t upto = (c2/2) % 12; */
+
+      /* if (col < upto) { */
+      /*     val |= 0b110000; */
+      /*     if (col < upto-1 || c2 % 2) { */
+      /*         val |= 0b110; */
+      /*     } */
+      /* } */
+
+
+      // 8s going across 
+      /* uint8_t upto = (c2/3) % 12; */
+
+      /* if (col <= upto) { */
+      /*     val |= 0b110000; */
+      /*     if (col < upto-1 || c2 % 3 == 2) { */
+      /*         val = 127; */
+      /*     } */
+      /*     else if (c2 % 3 == 1) { */
+      /*         val |= 1001001; */
+      /*     } */
+      /* } */
+
+      /* int8_t upto = (c2/3) % 3; */
+      /* if (row < upto) { */
+      /*     val|= 1; */
+      /*     if (row < upto-1 || c2 % 3 == 2) { */
+      /*         val |= 0b1001001; */
+      /*     } */
+      /*     else if (c2 % 3 == 1) { */
+      /*         val |= 1000001; */
+      /*     } */
+      /* } */
+      
 
 //    char c = message[characterCol];
 //    val = characters[c - '0'][numberIndex];
@@ -431,11 +465,12 @@ void mainTimer() {
 
 
                 secondsElapsed++;
+               c2++;         
             }
             interpolateFrames();
             frameCount++;
             counter = counter % NUM_COLS;
-            c2++;
+
         }
 
         lightDigits((counter++) % NUM_COLS);
