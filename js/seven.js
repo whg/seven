@@ -3,7 +3,7 @@ paper.install(window);
 // (function main() {
 
 var characterPaths = null;
-$.getJSON("fonts/Courier_Prime.json", function(data) {
+$.getJSON("fonts/Arial.json", function(data) {
     // charData = data;
     characterPaths = {};
     for (var key in data) {
@@ -18,6 +18,8 @@ var segmentColour = "#eee";
 var backgroundColour = "#1a1a1a";
 
 var canvas = document.getElementById("myCanvas");
+
+$("body").css("background-color", "#1a1a1a");
 
 paper.setup(canvas);
 
@@ -131,14 +133,22 @@ function fitLetter(letter, toGroup) {
     }
 
     letter.position = toGroup.position;
-    letter.fillColor = null; new Color(1, 1, 0, 0.25);
-
+    letter.fillColor = null; //new Color(0,0, 0, 1);
+    // project.activeLayer.addChild(letter);
     return letter;
 }
 
-var start = performance.now();
-function lightDigits(digitGroup, character) {
+
+
+function lightDigits(digitGroup, character, threshold) {
+// var start = performance.now();
+    if (threshold === undefined) {
+        threshold = 0.6;
+    }
+
+    
     digitGroup.children.forEach(function(d) {
+        // d.children["box"].fillColor = null;
         d.children["segments"].children.forEach(function(segment){
             segment.fillColor = null; "green";        // console.log(e.bounds);
 
@@ -148,21 +158,22 @@ function lightDigits(digitGroup, character) {
                 return;
             }
 
-            // isect.fillColor = "yellow"; "#666";
+            // isect.fillColor = segmentColour; "#666";
             // isect.strokeColor = "red";
-
+            // console.log(threshold);
 
             // console.log(isect.area + " -> " + segment.area)
-            if (isect.area > segment.area*0.6) {
+            if (isect.area > segment.area * threshold) {
                 segment.fillColor = segmentColour;
                 segment.on = true;
             }
         });
     });
+    // console.log("took:" + (performance.now() - start));
 }
 
 // lightDigits(tbt, letter);
-console.log("took:" + (performance.now() - start));
+
 
 
 project.activeLayer.scale(1.2, new Point(0,0))
@@ -177,6 +188,25 @@ for (var i = 0; i < 3; i++) {
 }
 
 // gr.fillColor = "red";
+function getVal(digit) {
+    var c = digit.children["segments"].children.map(function(segment) {
+        return segment.on;
+    });
+
+    var powers = [0,1,2,3,4,5,6,7].map(function (e) {
+        return Math.pow(2, e);
+    });
+
+    var pandv = _.zip(powers, c);
+    var mapped = _.map(pandv, function(e) {
+        return e[0] * e[1];
+    });
+    var ans = _.reduce(mapped, function(a, b) {
+        return a+b;
+    }, 0);
+
+    return ans;
+}
 
 // var tool = new Tool();
 function Action() {
@@ -194,25 +224,7 @@ function Action() {
             // console.log(charData[event.character].data);
             lightDigits(tbt, fitLetter(characterPaths[event.character], gr));
 
-            function getVal(digit) {
-                var c = digit.children["segments"].children.map(function(segment) {
-                    return segment.on;
-                });
-                
-                var powers = [0,1,2,3,4,5,6,7].map(function (e) {
-                    return Math.pow(2, e);
-                });
-
-                var pandv = _.zip(powers, c);
-                var mapped = _.map(pandv, function(e) {
-                    return e[0] * e[1];
-                });
-                var ans = _.reduce(mapped, function(a, b) {
-                    return a+b;
-                }, 0);
-
-                return ans;
-            }
+            
 
             var vals = _.map(tbt.children, getVal);
             console.log(vals);
@@ -228,3 +240,41 @@ function Action() {
 }
 
 var action = new Action();
+
+var chars = "0123456789"; //":;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ"; //0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"; //["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+var counter = 0;
+
+var current = [];
+
+function go(i, s) {
+    setTimeout(function() {
+
+        // project.activeLayer.removeChildren();
+
+        $("#message").text("character = " + i + ", threshold = " + s.toFixed(2));
+        lightDigits(tbt, fitLetter(characterPaths[chars[i]], gr), 0.6);
+        var vals = _.map(tbt.children, getVal);
+        // console.log(vals);
+        // console.log(current);
+        // console.log(_.difference(vals, current));
+        // if (_.difference(vals, current).length !== 0) {
+            // current = vals;
+            console.log(chars[i]);
+
+        console.log(vals);
+        // }
+            view.draw();
+        // if (s < 1.0) {
+            // go(i, s+0.05);
+        // }
+        // else {
+            // console.log(i + " asfd " + s);
+            if (++i < chars.length) {
+                go(i, 0.1); 
+            }
+        // }
+    }, 1000);
+}
+
+
+// go(0, 0.1);
